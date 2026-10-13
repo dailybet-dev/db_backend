@@ -20,3 +20,5 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://dailybet:change-me@localhost:5432/dailybet?schema=public
