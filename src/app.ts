@@ -22,8 +22,19 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   app.setErrorHandler((error, request, reply) => {
     request.log.error({ err: error }, 'Request failed');
-    const statusCode = error.statusCode && error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : 500;
-    reply.status(statusCode).send({ error: statusCode === 500 ? 'Internal server error' : error.message, requestId: request.id });
+    const candidateStatusCode =
+      typeof error === 'object' && error !== null && 'statusCode' in error
+        ? error.statusCode
+        : undefined;
+    const statusCode =
+      typeof candidateStatusCode === 'number' && candidateStatusCode >= 400 && candidateStatusCode < 600
+        ? candidateStatusCode
+        : 500;
+    const message = error instanceof Error ? error.message : 'Request failed';
+    reply.status(statusCode).send({
+      error: statusCode === 500 ? 'Internal server error' : message,
+      requestId: request.id,
+    });
   });
   return app;
 }
