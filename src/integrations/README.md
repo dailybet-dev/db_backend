@@ -1,18 +1,18 @@
 # Integration boundaries
 
-Do not hard-code a sportsbook, casino, virtuals, or payment vendor into route handlers. Implement a server-side adapter for each contracted provider and normalize its events, markets, odds, bet responses, payment callbacks and settlement events into DailyBet domain types.
+Provider adapters are intentionally interfaces only until DailyBet has selected and contracted a sportsbook/payment vendor and obtained sandbox credentials. Do not hard-code vendors into route handlers. Implement adapters in this folder and normalize vendor data into the domain contracts in `contracts.ts`.
 
-## Sportsbook adapter contract (planned)
+## Sportsbook adapter
 - fetch sports, competitions, events, markets and odds
-- subscribe to provider updates using the provider's supported transport
-- validate selections and price changes server-side immediately before acceptance
-- submit a bet with an idempotency key and store the provider's authoritative receipt
-- reconcile unsettled bets and settlements from provider callbacks/polling
+- consume provider updates using its supported transport
+- revalidate event status, selection and price server-side immediately before acceptance
+- submit bets with idempotency keys and store the provider's authoritative receipt
+- reconcile pending bets and settlement updates from provider callbacks/polling
 
-## Payments adapter contract (planned)
-- initiate deposit/withdrawal through approved channels
-- verify callback signatures and replay protection
-- use idempotency keys and a double-entry/append-only ledger
+## Payments adapter
+- initiate deposits/withdrawals through approved channels
+- verify callback signatures, raw payloads, timestamps and replay protection
+- use idempotency keys and an append-only ledger
 - reconcile provider statements and transaction state
 
-Provider contracts, credentials, sandbox accounts, settlement rules and licensing approvals are prerequisites. Never accept client-reported odds, balance, bet outcome or payment status as authoritative.
+Provider contracts, credentials, sandbox accounts, settlement rules and regulatory approvals are prerequisites. Never accept client-reported odds, balance, bet outcome or payment status as authoritative. Financial operations need database transactions, concurrency controls, explicit state machines and security review before activation.
